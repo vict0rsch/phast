@@ -240,7 +240,7 @@ class PropertiesEmbedding(nn.Module):
         (1-based) atomic numbers.
 
         Args:
-            z (torch.Tensor): Tensor of atomic numbers as ``torch.Long``.
+            z (torch.Tensor): Tensor of atomic numbers as ``torch.Long``.d
 
         Returns:
             The properties for each atom.
