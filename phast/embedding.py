@@ -1,3 +1,21 @@
+"""
+A Python package that endows graph neural networks with physical priors
+as part of the embeddings of atoms from their characteristic number.
+
+This package contains the implementation of a set of meta classes that are used to
+create atomic embeddings from physical properties of periodic table elements.
+
+The physical embeddings are learned or kept fixed depending on the specific use-case.
+The embeddings can also include information regarding the group and period of the
+elements.
+
+In the context of the Open Catalyst datasets, tag embeddings can also be used.
+
+This implementation relies on
+`Mendeleev <https://mendeleev.readthedocs.io/en/stable/data.html>`_ package to access
+the physical properties of elements from the periodic table.
+"""
+
 import os
 
 import pandas as pd
@@ -10,6 +28,38 @@ from mendeleev.fetch import fetch_ionization_energies, fetch_table
 
 
 class PhysRef(nn.Module):
+    """
+    This class implements an interface to access physical properties, period and
+    group ids of elements from the periodic table.
+
+    Attributes:
+        default_properties (list): A list of the default properties part of
+            atom embeddings.
+        properties_list (list): A list of the properties that are actually used for
+            creating the embeddings.
+        n_groups (int): The number of groups of the elements.
+        n_periods (int): The number of periods of the elements.
+        n_properties (int): The number of properties of the elements that are used to
+            create the embeddings.
+        properties (bool): Whether to create an embedding of physical embeddings.
+        properties_grad (bool): Whether the physical properties embedding should be
+            learned or kept fixed.
+        period (bool): Whether to use period embeddings.
+        group (bool): Whether to use group embeddings.
+        short (bool): A boolean flag indicating whether to keep only the columns that
+            do not have NaN values.
+        group_mapping (torch.Tensor): A tensor containing the mapping from the element
+            atomic number to the corresponding group embedding.
+        period_mapping (torch.Tensor): A tensor containing the mapping from the element
+            atomic number to the corresponding period embedding.
+        properties_mapping (torch.Tensor): A tensor containing the mapping from the
+            element atomic number to the corresponding physical properties embedding.
+
+    Methods:
+        __init__: Initializes the PhysRef class.
+        __repr__: Returns a string representation of the class instance.
+        period_and_group: Returns the period and group embeddings of the elements.
+    """
 
     default_properties = [
         "atomic_radius",
@@ -30,7 +80,7 @@ class PhysRef(nn.Module):
 
     def __init__(
         self,
-        properties=True,
+        properties=[],
         properties_grad=False,
         period=True,
         group=True,
@@ -38,18 +88,18 @@ class PhysRef(nn.Module):
         n_elements=85,
     ) -> None:
         """
-        Create physical embeddings meta class with sub-emeddings for each atom
+        Initializes the PhysRef class.
 
         Args:
-            properties (bool, optional): Whether to create an embedding of physical
-                embeddings. Defaults to True.
-            properties_grad (bool, optional): Whether the physical properties embedding
-                should be learned or kept fixed. Defaults to False.
-            period (bool, optional): Whether to use period embeddings.
-                Defaults to False.
-            group (bool, optional): Whether to use group embeddings.
-                Defaults to False.
-            short (bool, optional)
+            properties (list, optional): List of properties to include in the atom
+                embeddings. Each property must be a string as per the ``elements`` or
+                ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html`_.Defaults to [].
+            period (bool, optional): Whether to create period mappings, from atomic
+                number to period number.
+            group (bool, optional): Whether to create group mappings, from atomic
+                number to period number.
+            short (bool, optional): A boolean flag indicating whether to keep only the
+                columns that do not have NaN values.
             n_elements (int, optional): Number of elements to consider. Defaults to 85.
         """
         super().__init__()
@@ -75,7 +125,6 @@ class PhysRef(nn.Module):
         self.n_properties = 0
 
         self.properties = properties
-        self.properties_grad = properties_grad
         self.period = period
         self.group = group
         self.short = short
@@ -150,7 +199,32 @@ class PhysRef(nn.Module):
 
 
 class PropertiesEmbedding(nn.Module):
+    """
+    A class for retrieving physical properties from atomic numbers.
+
+    Args:
+        properties (torch.Tensor): A tensor containing the properties to be embedded.
+        grad (bool): Whether to enable gradient computation or not.
+
+    Attributes:
+        properties (nn.Parameter or nn.Buffer): A parameter or buffer storing the
+            properties.
+
+    Methods:
+        forward(z): Returns the embedded properties at the specified indices.
+        reset_parameters(): Does nothing in this class.
+    """
+
     def __init__(self, properties, grad=False):
+        """
+        Initializes the PropertiesEmbedding object.
+
+        Args:
+            properties (torch.Tensor): A tensor containing the properties to
+                use as embeddings.
+            grad (bool): Whether properties are fixed or learned (initialized
+                from true values then updated according the gradient).
+        """
         super().__init__()
         assert isinstance(properties, torch.Tensor)
         assert isinstance(grad, bool)
@@ -161,6 +235,16 @@ class PropertiesEmbedding(nn.Module):
             self.register_buffer("properties", properties)
 
     def forward(self, z):
+        """
+        Returns a properties for each atom in the batch according to
+        (1-based) atomic numbers.
+
+        Args:
+            z (torch.Tensor): Tensor of atomic numbers as ``torch.Long``.
+
+        Returns:
+            The properties for each atom.
+        """
         return self.properties[z]
 
     def reset_parameters(self):
@@ -168,6 +252,59 @@ class PropertiesEmbedding(nn.Module):
 
 
 class PhysEmbedding(nn.Module):
+    """This module embeds inputs for use in a neural network, using both
+    standard embeddings and physical properties. The input to the embedding
+    module can be a set of compositions, atomic numbers and tags, in addition to
+    any extra physical properties specified.
+
+    You can disable embeddings by setting their size to 0.
+
+    Args:
+        z_emb_size (int): size of the embedding for atomic number.
+        tag_emb_size (int): size of the embedding for tags.
+        period_emb_size (int): size of the embedding for periods.
+        group_emb_size (int): size of the embedding for groups.
+        properties (list): list of the physical properties to include in the
+            embedding. Each property is specified as a string, and should
+            correspond to a valid attribute of the Pymatgen Composition
+            class.
+        properties_proj_size (int): projection size of the physical properties
+            embedding.
+        properties_grad (bool): whether to set the physical properties to be
+            trainable or not.
+        final_proj_size (int): projection size for the final embedding.
+        n_elements (int): number of elements in the periodic table.
+
+    Raises:
+        ValueError: if `self.properties_proj_size` is greater than 0 and
+        `self.properties` is empty, or if `self.full_emb_size` is 0.
+
+    Attributes:
+        z_emb_size (int): size of the embedding for atomic number.
+        tag_emb_size (int): size of the embedding for tags.
+        period_emb_size (int): size of the embedding for periods.
+        group_emb_size (int): size of the embedding for groups.
+        properties (list): list of the physical properties to include in the
+            embedding. Each property must be a string as per the ``elements`` or
+                ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html`_.
+        properties_grad (bool): whether to set the physical properties to be
+            trainable or not.
+        n_elements (int): number of elements in the periodic table to consider.
+        phys_ref (PhysRef): Reference physical information interface.
+        full_emb_size (int): size of the final embedding.
+        embeddings (nn.ModuleDict): dictionary containing the different
+            embeddings.
+        phys_lin (Linear): a linear layer to project the physical properties to
+            the given size, if projection is requested.
+        final_proj (Linear): a linear layer to project the final embedding to
+            the requested size.
+
+    Methods:
+        reset_parameters: resets the parameters of the linear layers, and the
+            embeddings.
+        forward: embeds the input(s) using the available embeddings.
+    """
+
     def __init__(
         self,
         z_emb_size=32,
@@ -175,8 +312,8 @@ class PhysEmbedding(nn.Module):
         period_emb_size=32,
         group_emb_size=32,
         properties=PhysRef.default_properties,
-        properties_proj_size=0,
         properties_grad=False,
+        properties_proj_size=0,
         final_proj_size=0,
         n_elements=85,
     ):
@@ -192,10 +329,6 @@ class PhysEmbedding(nn.Module):
         self.n_elements = n_elements
 
         self.phys_lin = None
-        self.z_emb = None
-        self.period_emb = None
-        self.group_emb = None
-        self.group_emb = None
         self.final_proj = None
 
         # Check phys_emb_type is valid
@@ -282,6 +415,9 @@ class PhysEmbedding(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        """
+        Resets the parameters of the linear layers, and the embeddings.
+        """
         if self.phys_lin:
             nn.init.xavier_uniform_(self.phys_lin.weight)
         for emb in self.embeddings.values():
@@ -291,6 +427,21 @@ class PhysEmbedding(nn.Module):
                 emb.reset_parameters()
 
     def forward(self, z, tag=None):
+        """
+        Embeds the input(s) using the available embeddings.
+        Final embedding size is the sum of the individual embedding sizes,
+        except if `final_proj_size` is provided, in which case the final
+        embedding is projected to the requested size with an unbiased
+        linear layer.
+
+        Args:
+            z (torch.Tensor): Tensor of (long) atomic numbers.
+            tag (torch.Tensor, optional): Open Catalyst Project-style tags.
+                Defaults to None.
+
+        Returns:
+            torch.Tensor: Embedded representation of the input(s).
+        """
         pg = self.phys_ref.period_and_group(z.long())
         h = []
 
