@@ -166,3 +166,146 @@ class PropertiesEmbedding(nn.Module):
     def reset_parameters(self):
         pass
 
+
+class PhysEmbedding(nn.Module):
+    def __init__(
+        self,
+        z_emb_size=32,
+        tag_emb_size=32,
+        period_emb_size=32,
+        group_emb_size=32,
+        properties=PhysRef.default_properties,
+        properties_proj_size=0,
+        properties_grad=False,
+        final_proj_size=0,
+        n_elements=85,
+    ):
+        super().__init__()
+        self.z_emb_size = z_emb_size
+        self.tag_emb_size = tag_emb_size
+        self.period_emb_size = period_emb_size
+        self.group_emb_size = group_emb_size
+        self.properties_proj_size = properties_proj_size
+        self.final_proj_size = final_proj_size
+        self.properties = properties
+        self.properties_grad = properties_grad
+        self.n_elements = n_elements
+
+        self.phys_lin = None
+        self.z_emb = None
+        self.period_emb = None
+        self.group_emb = None
+        self.group_emb = None
+        self.final_proj = None
+
+        # Check phys_emb_type is valid
+        assert properties_grad in {
+            True,
+            False,
+        }, f"Unknown properties_grad {properties_grad}. Allowed: True or False."
+
+        if self.properties_proj_size > 0 and not self.properties:
+            raise ValueError(
+                "Cannot project physical properties if `self.properties` is empty."
+            )
+
+        # Check embedding sizes are non-negative
+        for emb_name, emb_size in {
+            "z_emb_size": z_emb_size,
+            "tag_emb_size": tag_emb_size,
+            "period_emb_size": period_emb_size,
+            "group_emb_size": group_emb_size,
+        }.items():
+            assert (
+                emb_size >= 0
+            ), f"Embedding size must be non-negative, got {emb_size} for {emb_name}"
+
+        self.full_emb_size = int(
+            self.z_emb_size
+            + self.tag_emb_size
+            + self.period_emb_size
+            + self.group_emb_size
+            + self.properties_proj_size * int(bool(self.properties))
+        )
+
+        # Physical properties
+        self.phys_ref = PhysRef(
+            properties=self.properties,
+            properties_grad=self.properties_grad,
+            period=self.period_emb_size > 0,
+            group=self.group_emb_size > 0,
+            n_elements=n_elements,
+        )
+
+        self.embeddings = nn.ModuleDict()
+
+        # Main embedding
+        if self.z_emb_size > 0:
+            self.embeddings["z"] = Embedding(n_elements, self.z_emb_size)
+
+        # With projection?
+        if self.properties:
+            properties_embedding = PropertiesEmbedding(
+                self.phys_ref.properties_mapping, self.properties_grad
+            )
+            if self.properties_proj_size > 0:
+                self.phys_lin = Linear(self.phys_ref.n_properties, properties_proj_size)
+                self.embeddings["properties"] = nn.Sequential(
+                    properties_embedding, self.phys_lin
+                )
+            else:
+                self.embeddings["properties"] = properties_embedding
+                self.full_emb_size += self.phys_ref.n_properties
+
+        if self.full_emb_size == 0:
+            raise ValueError("Total embedding size is 0!")
+
+        # Period embedding
+        if self.period_emb_size > 0:
+            self.embeddings["period"] = Embedding(
+                self.phys_ref.n_periods, self.period_emb_size
+            )
+
+        # Group embedding
+        if self.group_emb_size > 0:
+            self.embeddings["group"] = Embedding(
+                self.phys_ref.n_groups, self.group_emb_size
+            )
+
+        # Tag embedding
+        if self.tag_emb_size > 0:
+            self.embeddings["tag"] = Embedding(3, self.tag_emb_size)
+
+        if self.final_proj_size > 0:
+            self.final_proj = Linear(self.full_emb_size, self.final_proj_size)
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        if self.phys_lin:
+            nn.init.xavier_uniform_(self.phys_lin.weight)
+        for emb in self.embeddings.values():
+            if isinstance(emb, (nn.Sequential, PhysRef)):
+                pass
+            else:
+                emb.reset_parameters()
+
+    def forward(self, z, tag=None):
+        pg = self.phys_ref.period_and_group(z.long())
+        h = []
+
+        for e, emb in self.embeddings.items():
+            if e in pg:
+                h.append(emb(pg[e]))
+            elif e in {"z", "properties"}:
+                h.append(emb(z))
+            elif e == "tag":
+                assert tag is not None, "Tag embedding is used but no tag is provided."
+                h.append(emb(tag))
+
+        h = torch.cat(h, dim=-1)
+
+        if self.final_proj:
+            h = self.final_proj(h)
+
+        return h
