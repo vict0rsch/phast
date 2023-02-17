@@ -147,3 +147,22 @@ class PhysRef(nn.Module):
         if self.group:
             values["group"] = self.group_mapping[z]
         return values
+
+
+class PropertiesEmbedding(nn.Module):
+    def __init__(self, properties, grad=False):
+        super().__init__()
+        assert isinstance(properties, torch.Tensor)
+        assert isinstance(grad, bool)
+
+        if grad:
+            self.register_parameter("properties", nn.Parameter(properties))
+        else:
+            self.register_buffer("properties", properties)
+
+    def forward(self, z):
+        return self.properties[z]
+
+    def reset_parameters(self):
+        pass
+
