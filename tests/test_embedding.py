@@ -99,3 +99,9 @@ def test_shapes(kwargs):
                 * (1 - int(bool(kwargs["properties_proj_size"])))
             ),
         )
+
+
+def test_repr():
+    embed = phe.PhysEmbedding()
+    print(embed)
+    print(repr(embed))
