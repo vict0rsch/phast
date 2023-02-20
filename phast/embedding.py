@@ -286,7 +286,7 @@ class PhysEmbedding(nn.Module):
         group_emb_size (int): size of the embedding for groups.
         properties (list): list of the physical properties to include in the
             embedding. Each property must be a string as per the ``elements`` or
-                ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html`_.
+                ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html>`_.
         properties_grad (bool): whether to set the physical properties to be
             trainable or not.
         n_elements (int): number of elements in the periodic table to consider.
