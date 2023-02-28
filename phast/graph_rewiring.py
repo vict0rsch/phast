@@ -16,7 +16,8 @@ except ImportError:
 
 @ensure_pyg_ok
 def remove_tag0_nodes(data):
-    """Delete sub-surface (tag == 0) nodes and rewire accordingly the graph
+    """Delete sub-surface (tag == 0) nodes and rewire accordingly the graph.
+    Note: this function modifies the input data in-place.
 
     Expected ``data`` attributes:
         - ``pos`` (torch.Tensor): node positions
@@ -84,6 +85,7 @@ def remove_tag0_nodes(data):
 @ensure_pyg_ok
 def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
     """Generate a single supernode representing all tag0 atoms
+    Note: this function modifies the input data in-place.
 
     Args:
         data (data.Data): single batch of graphs
@@ -269,6 +271,7 @@ def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
 def one_supernode_per_atom_type(data, cutoff=6.0):
     """Create one supernode for each sub-surface atom type
     and remove all such tag-0 atoms.
+    Note: this function modifies the input data in-place.
 
     Args:
         data (torch_geometric.Data): the data batch to re-wire
