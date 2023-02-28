@@ -5,11 +5,24 @@ from copy import deepcopy
 
 import torch
 from torch import cat, isin, tensor, where
-from torch_geometric.utils import coalesce, remove_self_loops, sort_edge_index
+from phast.utils import ensure_pyg_ok
+
+try:
+    from torch_geometric.utils import coalesce, remove_self_loops, sort_edge_index
+
+except ImportError:
+    pass
 
 
+@ensure_pyg_ok
 def remove_tag0_nodes(data):
     """Delete sub-surface (tag == 0) nodes and rewire accordingly the graph
+
+    Expected ``data`` attributes:
+        - ``pos`` (torch.Tensor): node positions
+        - ``atomic_numbers`` (torch.Tensor): atomic numbers
+        - ``batch`` (torch.Tensor): batch ids
+        - ``force`` (torch.Tensor): forces
 
     Args:
         data (torch_geometric.Data): the data batch to re-wire
@@ -68,6 +81,7 @@ def remove_tag0_nodes(data):
     return data
 
 
+@ensure_pyg_ok
 def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
     """Generate a single supernode representing all tag0 atoms
 
@@ -251,6 +265,7 @@ def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
     return adjust_cutoff_distances(data, new_sn_ids, cutoff)
 
 
+@ensure_pyg_ok
 def one_supernode_per_atom_type(data, cutoff=6.0):
     """Create one supernode for each sub-surface atom type
     and remove all such tag-0 atoms.
@@ -487,6 +502,7 @@ def one_supernode_per_atom_type(data, cutoff=6.0):
     return adjust_cutoff_distances(data, new_sn_ids_cat, cutoff)
 
 
+@ensure_pyg_ok
 def one_supernode_per_atom_type_dist(data, cutoff=6.0):
     """Create one supernode for each sub-surface atom type
     and remove all such tag-0 atoms.
@@ -730,6 +746,7 @@ def one_supernode_per_atom_type_dist(data, cutoff=6.0):
     return adjust_cutoff_distances(data, new_sn_ids_cat, cutoff)
 
 
+@ensure_pyg_ok
 def adjust_cutoff_distances(data, sn_indxes, cutoff=6.0):
     # remove long edges (> cutoff), for sn related edges only
     sn_indxes = torch.isin(
