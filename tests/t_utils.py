@@ -24,7 +24,7 @@ def get_data():
             Path(__file__).resolve().parent.parent
             / "examples"
             / "data"
-            / "is2re_bs8.pt"
+            / "is2re_bs3.pt"
         )
         DATA = torch.load(data_path)
 
