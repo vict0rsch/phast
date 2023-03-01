@@ -1,3 +1,4 @@
+import os
 import sys
 from copy import deepcopy
 from itertools import product
@@ -5,6 +6,16 @@ from pathlib import Path
 from typing import Dict, List
 
 import torch
+
+try:
+    import ipdb  # noqa: F401
+
+    os.environ["PYTHONBREAKPOINT"] = "ipdb.set_trace"
+except:  # noqa: E722
+    print(
+        "`ipdb` is not installed. ",
+        "Consider `pip install ipdb` to improve your debugging experience.",
+    )
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 DATA = None
