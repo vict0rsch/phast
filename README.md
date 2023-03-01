@@ -6,4 +6,6 @@
 
 # PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
 
+Read the [paper](https://openreview.net/forum?id=hHercGKiXvP)
+
 Also: https://github.com/vict0rsch/faenet
