@@ -17,8 +17,8 @@ def test_one_supernode_per_graph():
 
 
 def test_one_supernode_per_atom_type():
-    pgr.one_supernode_per_atom_type(tu.get_data())
+    pgr.one_supernode_per_atom_type_new_dist(tu.get_data())
 
 
-def test_one_supernode_per_atom_type_dist():
-    pgr.one_supernode_per_atom_type_dist(tu.get_data())
+def test_one_supernode_per_atom_type_min_dist():
+    pgr.one_supernode_per_atom_type_min_dist(tu.get_data())
