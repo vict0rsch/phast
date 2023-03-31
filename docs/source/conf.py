@@ -21,11 +21,13 @@ root_doc = "index"
 
 extensions = [
     "myst_parser",
+    "sphinx.ext.viewcode",
     "sphinx_math_dollar",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
     "autoapi.extension",
     "sphinx.ext.napoleon",
+    "sphinx_autodoc_typehints",
 ]
 autoapi_type = "python"
 autoapi_dirs = ["../../phast"]
@@ -59,3 +61,9 @@ html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 4,
 }
+
+# https://github.com/tox-dev/sphinx-autodoc-typehints
+typehints_fully_qualified = False
+always_document_param_types = True
+typehints_document_rtype = True
+typehints_defaults = "comma"
