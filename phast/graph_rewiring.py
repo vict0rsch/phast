@@ -272,7 +272,7 @@ def one_supernode_per_atom_type_new_dist(data, cutoff=6.0):
     is computed between the new supernodes and tag 1 & 2 nodes.
 
     .. warning::
-        this function modifies the input data in-place.
+        This function modifies the input data in-place.
 
     Args:
         data (torch_geometric.Data): the data batch to re-wire
@@ -504,6 +504,21 @@ def one_supernode_per_atom_type_new_dist(data, cutoff=6.0):
 
 @ensure_pyg_ok
 def adjust_cutoff_distances(data, sn_indxes, cutoff=6.0):
+    """
+    Because of rewiring, some edges could be now longer than
+    the allowed cutoff distance. This function removes them.
+
+    .. warning::
+        This function modifies the input data in-place.
+
+    Args:
+        data (torch_geometric.Data): The rewired graph data.
+        sn_indxes (torch.Tensor[torch.Long]): Indices of the supernodes.
+        cutoff (float, optional): Maximum edge length. Defaults to 6.0.
+
+    Returns:
+        torch_geometric.Data: The updated graph.
+    """
     # remove long edges (> cutoff), for sn related edges only
     sn_indxes = isin(
         data.edge_index, tensor(sn_indxes, device=data.edge_index.device)
