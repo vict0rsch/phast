@@ -1,12 +1,7 @@
-import sys
-from itertools import product
-from pathlib import Path
-
 import pytest
 import torch
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
+import t_utils as tu
 from phast import embedding as phe
 
 init_search_space = {
@@ -21,10 +16,7 @@ init_search_space = {
     "n_elements": [85],
 }
 
-all_kwargs = [
-    {k: v for k, v in zip(init_search_space.keys(), prod_tuple)}
-    for prod_tuple in product(*init_search_space.values())
-]
+all_kwargs = tu.make_parameterization(init_search_space)
 
 
 @pytest.mark.parametrize("kwargs", all_kwargs)
