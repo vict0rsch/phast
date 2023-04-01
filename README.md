@@ -17,6 +17,8 @@ This repository contains implementations for 2 of the PhAST components presented
   * `remove_tag0_nodes` deletes all nodes in the graph associated with a tag 0 and recomputes edges
   * `one_supernode_per_graph` replaces all tag 0 atoms with a single new atom
   * `one_supernode_per_atom_typs` replaces all tag 0 atoms *of a given element* with its own super node
+    
+    <img src="https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png" width="600px" />
 
 Also: https://github.com/vict0rsch/faenet
 
