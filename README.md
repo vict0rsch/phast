@@ -76,6 +76,10 @@ phys_embedding = PhysEmbedding(
 )
 
 h = phys_embedding(z, tags) # h.shape = (3, 12, 64)
+
+# Assuming torch_geometric is installed:
+data = torch.load("examples/data/is2re_bs3.pt")
+h = phys_embedding(data.atomic_numbers.long(), data.tags) # h.shape = (261, 64)
 ```
 
 ### Graph rewiring
@@ -91,7 +95,7 @@ from phast.graph_rewiring import (
     one_supernode_per_atom_type,
 )
 
-data = torch.load("./examples/data/is2re_bs3.pt")  # 3 OC20 IS2RE data samples
+data = torch.load("./examples/data/is2re_bs3.pt")  # 3 batched OC20 IS2RE data samples
 print(
     "Data initially contains {} graphs, a total of {} atoms and {} edges".format(
         len(data.natoms), data.ptr[-1], len(data.cell_offsets)

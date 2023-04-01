@@ -42,6 +42,10 @@ the physical properties of elements from the periodic table.
 
     h = phys_embedding(z, tags) # h.shape = (3, 12, 64)
 
+    # Assuming torch_geometric is installed:
+
+    data = torch.load("examples/data/is2re_bs3.pt")
+    h = phys_embedding(data.atomic_numbers.long(), data.tags) # h.shape = (261, 64)
 
 """
 
