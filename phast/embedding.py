@@ -305,7 +305,7 @@ class PhysEmbedding(nn.Module):
 
     Raises:
         ValueError: if `self.properties_proj_size` is greater than 0 and
-        `self.properties` is empty
+            `self.properties` is empty
         ValueError: if `self.full_emb_size` is 0, i.e. all sizes were set to 0.
 
     Attributes:
