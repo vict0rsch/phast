@@ -38,6 +38,16 @@ This repository contains implementations for 2 of the PhAST components presented
 
 Also: https://github.com/vict0rsch/faenet
 
+## Installation
+
+```
+pip install phast
+```
+
+⚠️ The above installation does not include `torch_geometric` which is a complex and very variable dependency you have to install yourself if you want to use the graph re-wiring functions of `phast`.
+
+☮️ Ignore `torch_geometric` if you only care about the `PhysEmbeddings`.
+
 ## Getting started
 
 ### Physical embeddings
