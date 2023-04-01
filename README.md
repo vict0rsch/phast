@@ -1,14 +1,9 @@
 <p align="center">
-<br/>
 <strong><a href="https://github.com/vict0rsch/phast" target="_blank">💻&nbsp;&nbsp;Code</a></strong>
 <strong>&nbsp;&nbsp;•&nbsp;&nbsp;</strong>
 <strong><a href="https://phast.readthedocs.io/" target="_blank">Docs&nbsp;&nbsp;📑</a></strong>
 </p>
 
-<br/>
-
-# PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
-<br/><br/>
 <p align="center">
     <a>
 	    <img src='https://img.shields.io/badge/python-3.8%2B-blue' alt='Python' />
@@ -23,8 +18,10 @@
 <img src="https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?logo=PyTorch&logoColor=white"/>
 </a>
 </p>
+<br/>
 
-## About
+# PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
+
 
 This repository contains implementations for 2 of the PhAST components presented in the [paper](https://arxiv.org/abs/2211.12020):
 
