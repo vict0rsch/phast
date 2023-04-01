@@ -7,6 +7,14 @@ since 0C20 catalysts can have up to 3 elements).
 ..image:: https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png
     :alt: graph rewiring
     :width: 600px
+
+.. code-block:: python
+
+    from phast.graph_rewiring import remove_tag0_nodes
+
+    data = load_oc20_data_batch() # Yours to define
+    rewired_data = remove_tag0_nodes(data)
+
 """
 
 from copy import deepcopy

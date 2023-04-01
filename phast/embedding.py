@@ -14,6 +14,35 @@ In the context of the Open Catalyst datasets, tag embeddings can also be used.
 This implementation relies on
 `Mendeleev <https://mendeleev.readthedocs.io/en/stable/data.html>`_ package to access
 the physical properties of elements from the periodic table.
+
+.. image:: https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/embedding.png
+    :alt: graph rewiring
+    :width: 600px
+
+.. code-block:: python
+
+    import torch
+    from phast.embedding import PhysEmbedding
+
+    z = torch.randint(1, 85, (3, 12)) # batch of 3 graphs with 12 atoms each
+    phys_embedding = PhysEmbedding(
+        z_emb_size=32, # default
+        period_emb_size=32, # default
+        group_emb_size=32, # default
+        properties_proj_size=32, # default is 0 -> no learned projection
+        n_elements=85, # default
+    )
+    h = phys_embedding(z) # h.shape = (3, 12, 128)
+
+    tags = torch.randint(0, 3, (3, 12)) # batch of 3 graphs with 12 atoms each
+    phys_embedding = PhysEmbedding(
+        tag_emb_size=32, # default is 0, this is OC20-specific
+        final_proj_size=64, # default is 0, no projection, just the concat. of embeds.
+    )
+
+    h = phys_embedding(z, tags) # h.shape = (3, 12, 64)
+
+
 """
 
 import os
@@ -305,7 +334,7 @@ class PhysEmbedding(nn.Module):
     def __init__(
         self,
         z_emb_size: int = 32,
-        tag_emb_size: int = 32,
+        tag_emb_size: int = 0,
         period_emb_size: int = 32,
         group_emb_size: int = 32,
         properties=PhysRef.default_properties,
