@@ -1,13 +1,14 @@
 <p align="center">
 <br/>
-<strong><a href="https://github.com/vict0rsch/phast" target="_blank">💻 Code</a></strong>
+<strong><a href="https://github.com/vict0rsch/phast" target="_blank">💻&nbsp;&nbsp;Code</a></strong>
 <strong>&nbsp;&nbsp;•&nbsp;&nbsp;</strong>
-<strong><a href="https://phast.readthedocs.io/" target="_blank">Docs 📑</a></strong>
-<br/>
+<strong><a href="https://phast.readthedocs.io/" target="_blank">Docs&nbsp;&nbsp;📑</a></strong>
 </p>
 
-# PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
+<br/>
 
+# PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
+<br/><br/>
 <p align="center">
     <a>
 	    <img src='https://img.shields.io/badge/python-3.8%2B-blue' alt='Python' />
