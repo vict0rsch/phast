@@ -15,6 +15,9 @@ since 0C20 catalysts can have up to 3 elements).
     data = load_oc20_data_batch() # Yours to define
     rewired_data = remove_tag0_nodes(data)
 
+.. warning::
+    This modules expects ``torch_geometric`` to be installed.
+
 """
 
 from copy import deepcopy
