@@ -33,6 +33,14 @@ autoapi_type = "python"
 autoapi_dirs = ["../../phast"]
 autoapi_member_order = "alphabetical"
 autoapi_template_dir = "_autoapi_templates"
+autodoc_typehints = "both"
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+]
 
 autodoc_typehints = "description"
 mathjax_path = (
