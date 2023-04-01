@@ -4,7 +4,7 @@ aggregate all tag-0 atoms into a single super-node, or aggregate all tag-0 atoms
 a given element into a single super-node (hence, up to 3 super nodes will be created
 since 0C20 catalysts can have up to 3 elements).
 
-..image:: https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png
+.. image:: https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png
     :alt: graph rewiring
     :width: 600px
 
