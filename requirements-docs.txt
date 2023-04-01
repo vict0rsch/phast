@@ -5,3 +5,4 @@ sphinx-math-dollar==1.2.1
 sphinx-autoapi==2.0.0
 sphinx-autodoc-typehints
 sphinx-copybutton
+furo
