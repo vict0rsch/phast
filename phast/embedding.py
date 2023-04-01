@@ -259,20 +259,20 @@ class PhysEmbedding(nn.Module):
     You can disable embeddings by setting their size to 0.
 
     Args:
-        z_emb_size (:obj:`int`): size of the embedding for atomic number.
-        tag_emb_size (:obj:`int`): size of the embedding for tags.
-        period_emb_size (:obj:`int`): size of the embedding for periods.
-        group_emb_size (:obj:`int`): size of the embedding for groups.
-        properties (:obj:`list`): list of the physical properties to include in the
+        z_emb_size (:obj:`int`): Size of the embedding for atomic number.
+        tag_emb_size (:obj:`int`): Size of the embedding for tags.
+        period_emb_size (:obj:`int`): Size of the embedding for periods.
+        group_emb_size (:obj:`int`): Size of the embedding for groups.
+        properties (:obj:`list`): List of the physical properties to include in the
             embedding. Each property is specified as a string, and should
             correspond to a valid attribute of the Pymatgen Composition
             class.
-        properties_proj_size (:obj:`int`): projection size of the physical properties
+        properties_proj_size (:obj:`int`): Projection size of the physical properties
             embedding.
-        properties_grad (:obj:`bool`): whether to set the physical properties to be
+        properties_grad (:obj:`bool`): Whether to set the physical properties to be
             trainable or not.
-        final_proj_size (:obj:`int`): projection size for the final embedding.
-        n_elements (:obj:`int`): number of elements in the periodic table.
+        final_proj_size (:obj:`int`): Projection size for the final embedding.
+        n_elements (:obj:`int`): Number of elements in the periodic table.
 
     Raises:
         ValueError: if `self.properties_proj_size` is greater than 0 and
@@ -280,31 +280,26 @@ class PhysEmbedding(nn.Module):
         ValueError: if `self.full_emb_size` is 0, i.e. all sizes were set to 0.
 
     Attributes:
-        z_emb_size (:obj:`int`): size of the embedding for atomic number.
-        tag_emb_size (:obj:`int`): size of the embedding for tags.
-        period_emb_size (:obj:`int`): size of the embedding for periods.
-        group_emb_size (:obj:`int`): size of the embedding for groups.
-        properties (:obj:`list`): list of the physical properties to include in the
+        z_emb_size (:obj:`int`): Size of the embedding for atomic number.
+        tag_emb_size (:obj:`int`): Size of the embedding for tags.
+        period_emb_size (:obj:`int`): Size of the embedding for periods.
+        group_emb_size (:obj:`int`): Size of the embedding for groups.
+        properties (:obj:`list`): List of the physical properties to include in the
             embedding. Each property must be a string as per the ``elements`` or
-                ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html>`_.
-        properties_grad (:obj:`bool`): whether to set the physical properties to be
+            ``fetch_ionization_energies`` `Mendeleev tables <https://mendeleev.readthedocs.io/en/stable/notebooks/bulk_data_access.html>`_.
+        properties_grad (:obj:`bool`): Whether to set the physical properties to be
             trainable or not.
-        n_elements (:obj:`int`): number of elements in the periodic table to consider.
+        n_elements (:obj:`int`): Number of elements in the periodic table to consider.
         phys_ref (PhysRef): Reference physical information interface.
-        full_emb_size (:obj:`int`): total size of the concatenated embeddings.
-        final_emb_size (:obj:`int`): output size: either the final_proj_size or
+        full_emb_size (:obj:`int`): Total size of the concatenated embeddings.
+        final_emb_size (:obj:`int`): Output size: either the final_proj_size or
             full_emb_size.
-        embeddings (:obj:`nn.ModuleDict`): dictionary containing the different
+        embeddings (:obj:`nn.ModuleDict`): Dictionary containing the different
             embeddings.
-        phys_lin (:obj:`nn.Linear`): a linear layer to project the physical properties to
+        phys_lin (:obj:`nn.Linear`): A linear layer to project the physical properties to
             the given size, if projection is requested.
-        final_proj (:obj:`nn.Linear`): a linear layer to project the final embedding to
+        final_proj (:obj:`nn.Linear`): A linear layer to project the final embedding to
             the requested size.
-
-    Methods:
-        reset_parameters: resets the parameters of the linear layers, and the
-            embeddings.
-        forward: embeds the input(s) using the available embeddings.
     """
 
     def __init__(
