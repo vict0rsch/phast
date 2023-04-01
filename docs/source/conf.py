@@ -10,7 +10,7 @@ import sys
 
 project = "phast"
 copyright = "2023, OCP"
-author = "Victor Schmidt"
+author = "Victor Schmidt, Alexandre Duval"
 
 
 sys.path.insert(0, os.path.abspath("../.."))
@@ -32,6 +32,7 @@ extensions = [
 autoapi_type = "python"
 autoapi_dirs = ["../../phast"]
 autoapi_member_order = "alphabetical"
+autoapi_template_dir = "_autoapi_templates"
 
 autodoc_typehints = "description"
 mathjax_path = (
@@ -56,7 +57,7 @@ exclude_patterns = []
 
 # html_static_path = ["_static"]
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 5,
