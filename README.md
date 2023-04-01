@@ -1,10 +1,24 @@
 <p align="center">
+<br/>
 <strong><a href="https://github.com/vict0rsch/phast" target="_blank">💻 Code</a></strong>
 <strong>&nbsp;&nbsp;•&nbsp;&nbsp;</strong>
 <strong><a href="https://phast.readthedocs.io/" target="_blank">Docs 📑</a></strong>
+<br/>
 </p>
 
 # PhAST: Physics-Aware, Scalable, and Task-specific GNNs for Accelerated Catalyst Design
+
+<p align="center">
+    <a>
+	    <img src='https://img.shields.io/badge/python-3.9%2B-blue' alt='Python' />
+	</a>
+	<a href='https://phast.readthedocs.io/en/latest/?badge=latest'>
+    	<img src='https://readthedocs.org/projects/phast/badge/?version=latest' alt='Documentation Status' />
+	</a>
+    <a href="https://github.com/psf/black">
+	    <img src='https://img.shields.io/badge/code%20style-black-black' />
+	</a>
+</p>
 
 This repository contains implementations for 2 of the PhAST components presented in the [paper](https://arxiv.org/abs/2211.12020):
 
@@ -17,7 +31,7 @@ This repository contains implementations for 2 of the PhAST components presented
   * `remove_tag0_nodes` deletes all nodes in the graph associated with a tag 0 and recomputes edges
   * `one_supernode_per_graph` replaces all tag 0 atoms with a single new atom
   * `one_supernode_per_atom_typs` replaces all tag 0 atoms *of a given element* with its own super node
-    
+
     <img src="https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png" width="600px" />
 
 Also: https://github.com/vict0rsch/faenet
