@@ -34,7 +34,7 @@ the physical properties of elements from the periodic table.
     )
     h = phys_embedding(z) # h.shape = (3, 12, 128)
 
-    tags = torch.randint(0, 3, (3, 12)) # batch of 3 graphs with 12 atoms each
+    tags = torch.randint(0, 3, (3, 12))
     phys_embedding = PhysEmbedding(
         tag_emb_size=32, # default is 0, this is OC20-specific
         final_proj_size=64, # default is 0, no projection, just the concat. of embeds.
