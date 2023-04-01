@@ -18,6 +18,9 @@
     <a href="https://github.com/psf/black">
 	    <img src='https://img.shields.io/badge/code%20style-black-black' />
 	</a>
+<a href="https://pytorch.org">
+<img src="https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?logo=PyTorch&logoColor=white"/>
+</a>
 </p>
 
 ## About
