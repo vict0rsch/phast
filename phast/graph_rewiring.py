@@ -41,7 +41,7 @@ def remove_tag0_nodes(data: Union[Batch, Data]) -> Union[Batch, Data]:
     """
     Delete sub-surface (``data.tag == 0``) nodes and rewire the graph accordingly.
 
-    ..warning::
+    .. warning::
         This function modifies the input data in-place.
 
     Expected ``data`` tensor attributes:
@@ -126,12 +126,12 @@ def one_supernode_per_graph(
 
     Expected ``data`` attributes are the same as for :func:`remove_tag0_nodes`.
 
-    ..note::
+    .. note::
         $S$ will be created with a new atomic number $Z_{S} = num\_elements + 1$,
         so this should be set to the number of elements expected to be present in the
         dataset, not that of the current graph.
 
-    ..warning::
+    .. warning::
         This function modifies the input data in-place.
 
     Args:
@@ -329,7 +329,7 @@ def one_supernode_per_atom_type(
 
     Expected ``data`` attributes are the same as for :func:`remove_tag0_nodes`.
 
-    ..note::
+    .. note::
         $S_i$ conserves the atomic number of the tag-0 atoms it replaces.
 
     .. warning::
