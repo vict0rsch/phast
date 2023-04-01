@@ -1,4 +1,12 @@
-""" Rewire each 3D molecular graph
+"""In the context of the `OC20 dataset <https://opencatalystproject.org/index.html>`_,
+rewire each 3D molecular graph according to 1 of 3 strategies: remove all tag-0 atoms,
+aggregate all tag-0 atoms into a single super-node, or aggregate all tag-0 atoms of
+a given element into a single super-node (hence, up to 3 super nodes will be created
+since 0C20 catalysts can have up to 3 elements).
+
+..image:: https://opencatalystproject.org/images/oc20.png
+    :alt: graph rewiring
+    :width: 600px
 """
 
 from copy import deepcopy
@@ -7,29 +15,40 @@ import torch
 from torch import cat, isin, tensor, where
 from phast.utils import ensure_pyg_ok
 
+from typing import Union
+
 try:
     from torch_geometric.utils import coalesce, remove_self_loops, sort_edge_index
+    from torch_geometric.data import Batch, Data
 
 except ImportError:
     pass
 
 
 @ensure_pyg_ok
-def remove_tag0_nodes(data):
-    """Delete sub-surface (tag == 0) nodes and rewire accordingly the graph.
-    Note: this function modifies the input data in-place.
+def remove_tag0_nodes(data: Union[Batch, Data]) -> Union[Batch, Data]:
+    """
+    Delete sub-surface (``data.tag == 0``) nodes and rewire the graph accordingly.
 
-    Expected ``data`` attributes:
-        - ``pos`` (Tensor): node positions
-        - ``atomic_numbers`` (Tensor): atomic numbers
-        - ``batch`` (Tensor): batch ids
-        - ``force`` (Tensor): forces
+    ..warning::
+        This function modifies the input data in-place.
+
+    Expected ``data`` tensor attributes:
+        - ``pos``: node positions
+        - ``atomic_numbers``: atomic numbers
+        - ``batch``: mini-batch id for each atom
+        - ``tags``: atom tags
+        - ``edge_index``: edge indices as a $2 \times E$ tensor
+        - ``force``: force vectors per atom (optional)
+        - ``pos_relaxed``: relaxed atom positions (optional)
+        - ``fixed``: mask for fixed atoms (optional)
+        - ``natoms``: number of atoms per graph
+        - ``ptr``: cumulative sum of ``natoms``
+        - ``cell_offsets``: unit cell directional offset for each edge
+        - ``distances``: distance between each edge's atoms
 
     Args:
         data (torch_geometric.Data): the data batch to re-wire
-
-    Returns:
-        torch_geometric.Data: the data rewired data batch
     """
     device = data.edge_index.device
 
@@ -83,9 +102,26 @@ def remove_tag0_nodes(data):
 
 
 @ensure_pyg_ok
-def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
-    """Generate a single supernode representing all tag0 atoms
-    Note: this function modifies the input data in-place.
+def one_supernode_per_graph(
+    data: Union[Batch, Data], cutoff: float = 6.0, num_elements: int = 83
+) -> Union[Batch, Data]:
+    """
+    Replaces all tag-0 atom with a single super-node $S$ representing them, per graph.
+    For each graph, $S$ is the last node in the graph.
+    $S$ is positioned at the center of mass of all tag-0 atoms in $x$ and $y$ directions
+    but at the maximum $z$ coordinate of all tag-0 atoms.
+    All atoms previously connected to a tag-0 atom are now connected to $S$ unless
+    that would create an edge longer than ``cutoff``.
+
+    Expected ``data`` attributes are the same as for :func:`remove_tag0_nodes`.
+
+    ..note::
+        $S$ will be created with a new atomic number $Z_{S} = num\_elements + 1$,
+        so this should be set to the number of elements expected to be present in the
+        dataset, not that of the current graph.
+
+    ..warning::
+        This function modifies the input data in-place.
 
     Args:
         data (data.Data): single batch of graphs
@@ -144,7 +180,12 @@ def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
     # learn a new embedding to each supernode
     data.atomic_numbers = cat(
         [
-            cat([data.atomic_numbers[non_sub_nodes[i]], tensor([84], device=device)])
+            cat(
+                [
+                    data.atomic_numbers[non_sub_nodes[i]],
+                    tensor([num_elements + 1], device=device),
+                ]
+            )
             for i in range(batch_size)
         ]
     )
@@ -266,10 +307,19 @@ def one_supernode_per_graph(data, cutoff=6.0, verbose=False):
 
 
 @ensure_pyg_ok
-def one_supernode_per_atom_type_new_dist(data, cutoff=6.0):
-    """Create one supernode for each sub-surface atom type
-    and remove all such tag-0 atoms. The distance between nodes
-    is computed between the new supernodes and tag 1 & 2 nodes.
+def one_supernode_per_atom_type(
+    data: Union[Batch, Data], cutoff: float = 6.0
+) -> Union[Batch, Data]:
+    """
+    For each graph independently, replace all tag-0 atoms of a given element by a new
+    super node $S_i, \ i \in \{1..3\}$. As per :func:`one_supernode_per_graph`, each
+    $S_i$ is positioned at the center of mass of the atoms it replaces in $x$ and $y$
+    dimensions but at the maximum height of the atoms it replaces in the $z$ dimension.
+
+    Expected ``data`` attributes are the same as for :func:`remove_tag0_nodes`.
+
+    ..note::
+        $S_i$ conserves the atomic number of the tag-0 atoms it replaces.
 
     .. warning::
         This function modifies the input data in-place.
@@ -503,10 +553,18 @@ def one_supernode_per_atom_type_new_dist(data, cutoff=6.0):
 
 
 @ensure_pyg_ok
-def adjust_cutoff_distances(data, sn_indxes, cutoff=6.0):
+def adjust_cutoff_distances(
+    data: Union[Data, Batch], sn_indxes: torch.Tensor, cutoff: float = 6.0
+) -> Union[Data, Batch]:
     """
     Because of rewiring, some edges could be now longer than
     the allowed cutoff distance. This function removes them.
+
+    Modified attributes:
+    * ``edge_index``
+    * ``cell_offsets``
+    * ``distances``
+    * ``neighbors``
 
     .. warning::
         This function modifies the input data in-place.
