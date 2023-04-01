@@ -20,6 +20,8 @@
 	</a>
 </p>
 
+## About
+
 This repository contains implementations for 2 of the PhAST components presented in the [paper](https://arxiv.org/abs/2211.12020):
 
 * `PhysEmbedding` that allows one to create an embedding vector from atomic numbers that is the concatenation of:
@@ -35,6 +37,81 @@ This repository contains implementations for 2 of the PhAST components presented
     <img src="https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png" width="600px" />
 
 Also: https://github.com/vict0rsch/faenet
+
+## Getting started
+
+### Physical embeddings
+
+![Embedding illustration](https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/embedding.png)
+
+```python
+import torch
+from phast.embedding import PhysEmbedding
+
+z = torch.randint(1, 85, (3, 12)) # batch of 3 graphs with 12 atoms each
+phys_embedding = PhysEmbedding(
+    z_emb_size=32, # default
+    period_emb_size=32, # default
+    group_emb_size=32, # default
+    properties_proj_size=32, # default is 0 -> no learned projection
+    n_elements=85, # default
+)
+h = phys_embedding(z) # h.shape = (3, 12, 128)
+
+tags = torch.randint(0, 3, (3, 12))
+phys_embedding = PhysEmbedding(
+    tag_emb_size=32, # default is 0, this is OC20-specific
+    final_proj_size=64, # default is 0, no projection, just the concat. of embeds.
+)
+
+h = phys_embedding(z, tags) # h.shape = (3, 12, 64)
+```
+
+### Graph rewiring
+
+![Rewiring illustration](https://raw.githubusercontent.com/vict0rsch/phast/main/examples/data/rewiring.png)
+
+```python
+from copy import deepcopy
+import torch
+from phast.graph_rewiring import (
+    remove_tag0_nodes,
+    one_supernode_per_graph,
+    one_supernode_per_atom_type,
+)
+
+data = torch.load("./examples/data/is2re_bs3.pt")  # 3 OC20 IS2RE data samples
+print(
+    "Data initially contains {} graphs, a total of {} atoms and {} edges".format(
+        len(data.natoms), data.ptr[-1], len(data.cell_offsets)
+    )
+)
+rewired_data = remove_tag0_nodes(deepcopy(data))
+print(
+    "Data without tag-0 nodes contains {} graphs, a total of {} atoms and {} edges".format(
+        len(rewired_data.natoms), rewired_data.ptr[-1], len(rewired_data.cell_offsets)
+    )
+)
+rewired_data = one_supernode_per_graph(deepcopy(data))
+print(
+    "Data with one super node per graph contains a total of {} atoms and {} edges".format(
+        rewired_data.ptr[-1], len(rewired_data.cell_offsets)
+    )
+)
+rewired_data = one_supernode_per_atom_type(deepcopy(data))
+print(
+    "Data with one super node per atom type contains a total of {} atoms and {} edges".format(
+        rewired_data.ptr[-1], len(rewired_data.cell_offsets)
+    )
+)
+```
+
+```
+Data initially contains 3 graphs, a total of 261 atoms and 11596 edges
+Data without tag-0 nodes contains 3 graphs, a total of 64 atoms and 1236 edges
+Data with one super node per graph contains a total of 67 atoms and 1311 edges
+Data with one super node per atom type contains a total of 71 atoms and 1421 edges
+```
 
 ## Tests
 
