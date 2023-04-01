@@ -10,7 +10,7 @@
 
 <p align="center">
     <a>
-	    <img src='https://img.shields.io/badge/python-3.9%2B-blue' alt='Python' />
+	    <img src='https://img.shields.io/badge/python-3.8%2B-blue' alt='Python' />
 	</a>
 	<a href='https://phast.readthedocs.io/en/latest/?badge=latest'>
     	<img src='https://readthedocs.org/projects/phast/badge/?version=latest' alt='Documentation Status' />
