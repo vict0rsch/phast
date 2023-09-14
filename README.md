@@ -139,3 +139,9 @@ pytest --cov=phast --cov-report term-missing
 ```
 
 Testing on Macs you may encounter a [Library Not Loaded Error](https://github.com/pyg-team/pytorch_geometric/issues/6530)
+
+Requires Python <3.12 because
+
+```txt
+mendeleev (0.14.0) requires Python >=3.8.1,<3.12
+```
