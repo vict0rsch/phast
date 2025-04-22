@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "phast"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["Victor Schmidt <vsch@pm.me>"]
 license = "MIT"
