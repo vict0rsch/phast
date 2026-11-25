@@ -165,6 +165,14 @@ class PhysRef(nn.Module):
         df = fetch_table("elements")
         df = df.set_index("atomic_number")
 
+        # Compute atomic volume as the ratio of atomic weight / density
+        # The atomic volume was a property included in earlier versions of mendeleev
+        # but it has been removed in recent versions
+        # Note: The calculation below does not return the same values as the previous
+        # property especially for gases at room temperature. It seems that the previous
+        # volume used the density of liquid states
+        df["atomic_volume"] = df["atomic_weight"] / df["density"]
+
         # Add ionization energy
         ies = fetch_ionization_energies(degree=[1, 2])
         df = pd.concat([df, ies], axis=1)
